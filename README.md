@@ -27,6 +27,8 @@ X has no built-in way to see "who didn't follow me back". You follow hundreds of
 3. Make sure you're logged in to [x.com](https://x.com) in this Chrome profile
 4. Click the extension icon → **Open Dashboard** → **Start Scan**
 
+📖 **Detailed tutorial (中文详细教程，含常见问题): [TUTORIAL.md](TUTORIAL.md)**
+
 ## How it works
 
 ```

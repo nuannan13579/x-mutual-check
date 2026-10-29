@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "X 互关检测器",
+  "version": "1.1.0",
+  "description": "快速找出你关注了但对方没有回关的 X 账号，自己挑选是否取关。",
+  "permissions": ["storage", "cookies", "tabs"],
+  "host_permissions": ["https://x.com/*", "https://twitter.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "X 互关检测器",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://x.com/*", "*://twitter.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

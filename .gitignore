@@ -1,0 +1,6 @@
+# Release zip excludes these in git working copy
+*.zip
+*.crx
+*.pem
+.DS_Store
+Thumbs.db

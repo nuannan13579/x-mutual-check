@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>X 互关检测器</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">X</div>
+      <div>
+        <h1>互关检测器</h1>
+        <p>找出没有回关你的账号</p>
+      </div>
+    </header>
+
+    <div id="loginBadge" class="badge">检测登录中…</div>
+
+    <section class="summary">
+      <div class="sum-item">
+        <span>没回关</span>
+        <strong id="notBack">—</strong>
+      </div>
+      <div class="sum-item">
+        <span>已扫描</span>
+        <strong id="scanned">—</strong>
+      </div>
+      <div class="sum-item">
+        <span>互关</span>
+        <strong id="mutual">—</strong>
+      </div>
+    </section>
+
+    <div id="statusLine" class="status-line">还没有扫描记录</div>
+
+    <button id="openDashboard" class="primary" type="button">打开检测面板</button>
+    <div class="quick-row">
+      <button id="openX" class="ghost" type="button">打开 X</button>
+      <button id="openSettings" class="ghost" type="button">设置</button>
+    </div>
+
+    <p class="foot">数据只保存在本地。取关必须由你确认。</p>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

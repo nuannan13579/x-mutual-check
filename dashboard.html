@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>X 互关检测器</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">X</div>
+        <div>
+          <h1>互关检测器</h1>
+          <p>找出你关注了、但对方没有回关的账号</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span id="loginBadge" class="badge badge-muted">检测登录中…</span>
+        <button id="openHomeBtn" class="btn btn-ghost btn-sm" type="button">打开 X</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">MUTUAL CHECK</p>
+          <h2>先扫描，再由你逐条挑选</h2>
+          <p class="lead">扩展复用你当前 Chrome 里的 X 登录态。优先走快速接口；接口不可用时自动降级为页面滚动采集。不会自动关注、点赞或评论，也不会未经确认取关。</p>
+
+          <div class="account-line" id="accountLine">
+            <span class="dot"></span>
+            <span>尚未扫描</span>
+          </div>
+
+          <div class="controls">
+            <label class="field">
+              <span>扫描上限</span>
+              <input id="maxAccounts" type="number" min="20" max="10000" step="100" value="2500">
+            </label>
+            <label class="field">
+              <span>扫描方式</span>
+              <select id="mode">
+                <option value="auto">自动（推荐）</option>
+                <option value="api">只用快速接口</option>
+                <option value="dom">兼容模式（较慢）</option>
+              </select>
+            </label>
+            <button id="scanBtn" class="btn btn-primary" type="button">开始扫描</button>
+            <button id="stopBtn" class="btn btn-danger-ghost hidden" type="button">停止扫描</button>
+          </div>
+
+          <div id="progressBox" class="progress-box hidden">
+            <div class="progress-head">
+              <span class="spinner"></span>
+              <span id="progressText">准备中…</span>
+            </div>
+            <div class="progress-track"><span class="progress-indeterminate"></span></div>
+            <p class="hint">扫描期间会打开一个隐藏的 X 工作页，完成或停止后自动关闭。请不要关闭本页面。</p>
+          </div>
+
+          <div id="notice" class="notice hidden"></div>
+        </div>
+
+        <aside class="hero-side">
+          <div class="mini-stat">
+            <span class="mini-label">上次结果</span>
+            <strong id="lastScanTime">—</strong>
+            <span id="lastScanSource" class="mini-sub">还没有扫描记录</span>
+          </div>
+          <div class="risk-note">
+            <strong>使用提醒</strong>
+            <p>取关是真实操作。建议只挑选清理，控制频率，并遵守 X 的服务条款。接口路径属于网页内部接口，X 改版后可能失效。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-label">已扫描关注</span>
+          <strong id="statScanned">0</strong>
+          <span class="stat-sub">按扫描上限读取</span>
+        </article>
+        <article class="stat-card stat-danger">
+          <span class="stat-label">没有回关</span>
+          <strong id="statNotFollowing">0</strong>
+          <span class="stat-sub">你可以逐条挑选取关</span>
+        </article>
+        <article class="stat-card stat-good">
+          <span class="stat-label">互相关注</span>
+          <strong id="statMutual">0</strong>
+          <span class="stat-sub">对方也关注了你</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">待确认 / 已保留 / 已取关</span>
+          <strong><span id="statUnknown">0</span><span class="stat-divider">/</span><span id="statKept">0</span><span class="stat-divider">/</span><span id="statUnfollowed">0</span></strong>
+          <span class="stat-sub">保留名单会跨扫描生效</span>
+        </article>
+      </section>
+
+      <section class="results card">
+        <div class="results-head">
+          <div class="tabs" id="tabs">
+            <button class="tab active" data-filter="notFollowing" type="button">未回关 <span id="tabNotFollowing">0</span></button>
+            <button class="tab" data-filter="mutual" type="button">互关 <span id="tabMutual">0</span></button>
+            <button class="tab" data-filter="unknown" type="button">待确认 <span id="tabUnknown">0</span></button>
+            <button class="tab" data-filter="kept" type="button">已保留 <span id="tabKept">0</span></button>
+            <button class="tab" data-filter="all" type="button">全部 <span id="tabAll">0</span></button>
+            <button class="tab" data-filter="unfollowed" type="button">已取关 <span id="tabUnfollowed">0</span></button>
+          </div>
+          <div class="tools">
+            <label class="search-wrap">
+              <span aria-hidden="true">⌕</span>
+              <input id="searchInput" type="search" placeholder="搜索 @账号或昵称" autocomplete="off">
+            </label>
+            <button id="exportBtn" class="btn btn-ghost btn-sm" type="button">导出 CSV</button>
+          </div>
+        </div>
+
+        <div class="filterbar">
+          <span class="filter-title">二次筛选</span>
+          <label class="range-field">
+            <span>粉丝数</span>
+            <input id="minFollowers" type="number" min="0" step="10" placeholder="最低" inputmode="numeric">
+            <span class="range-sep">—</span>
+            <input id="maxFollowers" type="number" min="0" step="10" placeholder="最高" inputmode="numeric">
+          </label>
+          <select id="sortBy" class="sort-select" title="排序方式">
+            <option value="default">默认排序</option>
+            <option value="followersAsc">粉丝数：少 → 多</option>
+            <option value="followersDesc">粉丝数：多 → 少</option>
+            <option value="followingAsc">关注数：少 → 多</option>
+            <option value="followingDesc">关注数：多 → 少</option>
+          </select>
+          <button id="clearFollowerFilter" class="btn btn-ghost btn-sm" type="button">清除筛选</button>
+          <span id="followerFilterHint" class="filter-hint"></span>
+        </div>
+
+        <div class="batchbar">
+          <label class="checkline"><input id="selectAll" type="checkbox"> 全选当前列表</label>
+          <span id="selectedCount" class="selected-count">已选 0 人</span>
+          <div class="batch-actions">
+            <button id="batchBtn" class="btn btn-danger btn-sm" type="button" disabled>批量取关</button>
+            <button id="clearSelectedBtn" class="btn btn-ghost btn-sm" type="button">清除选择</button>
+            <span id="batchProgress" class="batch-progress"></span>
+          </div>
+        </div>
+
+        <div id="tableWrap" class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-check"></th>
+                <th>账号</th>
+                <th>回关状态</th>
+                <th>粉丝 / 关注</th>
+                <th class="col-actions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon">⌁</div>
+          <h3>还没有扫描结果</h3>
+          <p>点击上方「开始扫描」，先读取你的关注列表。</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>本地运行 · 数据只存在你的 Chrome 扩展存储里</span>
+        <span>不做自动关注 / 自动评论</span>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <div id="confirmOverlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h3 id="confirmTitle">确认取关？</h3>
+      <p id="confirmText"></p>
+      <div class="modal-actions">
+        <button id="confirmCancel" class="btn btn-ghost" type="button">取消</button>
+        <button id="confirmOk" class="btn btn-danger" type="button">确认取关</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
